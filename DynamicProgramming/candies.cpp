@@ -19,6 +19,7 @@ long candies( int n, vector<int> arr) {
 
     candies[0] = 1;
     for (int i = 1; i < arr.size(); i++)
+	// iterate from left to right and check neighbours
         if (arr[i - 1] < arr[i])
             candies[i] = candies[i - 1] + 1;
         else
@@ -28,8 +29,10 @@ long candies( int n, vector<int> arr) {
     long sumCandies = candies[arr.size() - 1];
     for (int i = arr.size() - 2; i >= 0; i--)
     {
+	// iterate from right to left and check neighbours and also take max values in result array
         if (arr[i] > arr[i + 1])
             candies[i] = max(candies[i + 1] + 1, candies[i]);
+	// do calculate max candies required
         sumCandies += candies[i];
     }
 
