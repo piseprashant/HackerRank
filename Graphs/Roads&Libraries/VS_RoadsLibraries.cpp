@@ -11,70 +11,79 @@
 
 using namespace std;
 
-int dfs(int src, vector<vector<int>>& adj, vector<bool>& visited) {
+int dfs(vector<vector<int>>& adjList, int src, vector<bool>& visited) {
     visited[src] = true;
-    int cost = 0;
+   
+    int ans = 1; // size of the component with current src/node as source.
 
-    for (int i = 0; i < adj[src].size(); ++i)
+    /*
+    //   1 + 1 + 1 = 3
+    //    O ANS = 1
+        /   \
+      1/     \1
+      0       0
+    */
+    //cout << "ans=" << ans << endl;
+    for (unsigned int i = 0; i < adjList[src].size(); ++i)
     {
-        if (!visited[adj[src][i]])
+        if (!visited[adjList[src][i]])
         {
-            cost += 1;
-            cost += dfs(i, adj, visited);
+            ans += dfs(adjList, adjList[src][i], visited);
+            //cout << "adjList[src][i]="  << adjList[src][i] << "  ans=" << ans << endl;
+        }
+        else
+        {
+            //cout << "visited adjList[src][i]=" << adjList[src][i] << endl;
         }
     }
-    return cost;   // size of component
+   // cout  << "ans-" << ans << endl;
+    return ans;   // size of component
 }
 
-long roadsAndLibraries(int n, int m, int c_lib, int c_road, vector<vector<int>> cities)
-{
-    if (c_lib < c_road)
-    {
-        return c_lib * n;
-    }
+long roadsAndLibraries(int n, int c_lib, int c_road, vector<vector<int>> cities) {
 
-    if (m == 0) { return n * c_lib; }
-        
     // core logic to create adjanceny list
-    vector<vector<int>> adj(n + 1);
-
-    //create adjanceny list
+    /*
+    O <--> O
+    */
+    vector<vector<int>> adjList(n + 1);
     for (int i = 0; i < cities.size(); ++i)
     {
-        adj[cities[i][0]].push_back(cities[i][1]);
-        adj[cities[i][1]].push_back(cities[i][0]);
+        adjList[cities[i][0]].push_back(cities[i][1]);
+        adjList[cities[i][1]].push_back(cities[i][0]);
+     //   cout << "cities[i][1]= " << cities[i][1] << "  cities[i][0] = " << cities[i][0] << endl;
     }
 
     vector<int> comps;
 
     vector<bool> visited(n + 1, false);
-    int vis = 0;
-    for (int i = 1; i < n+1; ++i)
+
+    for (int i = 1; i <= n; ++i)
     {
-        if (adj[i].size() > 0 && !visited[i])
+        if (adjList[i].size() > 0 && !visited[i])
         {
-            vis = dfs(i, adj, visited);
+            comps.push_back(dfs(adjList, i, visited));
         }
-        //// only 1 disconnected city and push only 1 component
-        //else if (adj[i].size() == 0) {
-        //    comps.push_back(1);
-        //}
+        // only 1 disconnected city and push only 1 component
+        else if (adjList[i].size() == 0) {
+            comps.push_back(1);
+        }
     }
 
     long long int ans = 0;
-    ans = (((vis)*c_road) + ((n - vis) * c_lib));
+
     // business logic
 
-    //// iterate to all the components
-    //for (int i = 0; i < comps.size(); ++i)
-    //{
-    //    // is it min cost to build roads or libraries
-    //    // compp n - 1
-    //    ans += min((comps[i] - 1) * c_road + c_lib, comps[i] * c_lib);
-    //}
+    // iterate to all the components
+    for (int i = 0; i < comps.size(); ++i)
+    {
+        // is it min cost to build roads or libraries
+        // compp n - 1
+       // cout <<  "ans = " << ans <<  "(comps[i] - 1) * c_road + c_lib = " << (comps[i] - 1) * c_road + c_lib << " comps[i] * c_lib= " << comps[i] * c_lib << endl;
+        ans += min((comps[i] - 1) * c_road + c_lib, comps[i] * c_lib);
+    }
     return ans;
 }
-
 
 int main()
 {
@@ -99,7 +108,7 @@ int main()
     {5, 6 }
 };
 
-	std::cout << roadsAndLibraries(n, m, c_lib, c_road, cities) << std::endl;
+	std::cout << roadsAndLibraries(n, c_lib, c_road, cities) << std::endl;
 
 	return 0;
 }
